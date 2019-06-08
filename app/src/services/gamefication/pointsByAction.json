@@ -1,0 +1,30 @@
+{
+  "report": {
+    "points": 20,
+    "multiplierByLevel": [1, 1, 2, 1, 1, 2, 2, 3, 4, 4]
+  },
+  "support": {
+    "points": 4,
+    "multiplierByLevel": [1, 2, 1, 1, 1, 2, 2, 3, 4, 4]
+  },
+  "comment": {
+    "points": 2,
+    "multiplierByLevel": [1, 1, 1, 1, 1, 2, 2, 3, 4, 4]
+  },
+  "share": {
+    "points": 4,
+    "multiplierByLevel": [1, 1, 1, 1, 1, 2, 2, 3, 4, 4]
+  },
+  "solved": {
+    "points": 10,
+    "multiplierByLevel": [1, 1, 1, 1, 2, 2, 2, 3, 4, 4]
+  },
+  "denounced": {
+    "points": 2,
+    "multiplierByLevel": [1, 1, 1, 1, 1, 2, 2, 3, 4, 4]
+  },
+  "invite": {
+    "points": 10,
+    "multiplierByLevel": [1, 1, 1, 2, 1, 2, 2, 3, 4, 4]
+  }
+}

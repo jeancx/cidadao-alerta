@@ -1,0 +1,42 @@
+[
+  {
+    "points": 0,
+    "benefits": "Nenhum"
+  },
+  {
+    "points": 250,
+    "benefits": "Dobro de XP ao apoiar"
+  },
+  {
+    "points": 500,
+    "benefits": "Dobro de XP ao relatar"
+  },
+  {
+    "points": 1000,
+    "benefits": "Dobro de XP ao convidar amigo"
+  },
+  {
+    "points": 2000,
+    "benefits": "Marcar como “resolvido” ou “não resolvido” tem duas vezes mais peso"
+  },
+  {
+    "points": 4000,
+    "benefits": "Dobro de XP em todas as ações"
+  },
+  {
+    "points": 8000,
+    "benefits": "Marcar como “resolvido” ou “não resolvido” tem quatro vezes mais peso"
+  },
+  {
+    "points": 16000,
+    "benefits": "3 vezes mais XP em todas as ações"
+  },
+  {
+    "points": 32000,
+    "benefits": "4 vezes mais XP em todas as ações"
+  },
+  {
+    "points": 64000,
+    "benefits": "Prioridade de ser convidado a ser moderador"
+  }
+]
