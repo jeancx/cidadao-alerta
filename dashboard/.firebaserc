@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "cidadao-alerta-2019"
+  },
+  "targets": {
+    "cidadao-alerta-2019": {
+      "hosting": {
+        "app": [
+          "cidadao-alerta-2019"
+        ]
+      }
+    }
+  }
+}
