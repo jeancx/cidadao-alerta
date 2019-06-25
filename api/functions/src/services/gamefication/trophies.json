@@ -1,0 +1,50 @@
+[
+  {
+    "name": "20 relatos",
+    "type": "report",
+    "number": 20,
+    "points": 50
+  },
+  {
+    "name": "50 relatos",
+    "type": "report",
+    "number": 50,
+    "points": 100
+  },
+  {
+    "name": "100 relatos",
+    "type": "report",
+    "number": 100,
+    "points": 500
+  },
+  {
+    "name": "500 relatos",
+    "type": "report",
+    "number": 500,
+    "points": 1000
+  },
+  {
+    "name": "50 compartilhamentos",
+    "type": "share",
+    "number": 50,
+    "points": 100
+  },
+  {
+    "name": "100 compartilhamentos",
+    "type": "share",
+    "number": 100,
+    "points": 200
+  },
+  {
+    "name": "50 apoios",
+    "type": "support",
+    "number": 50,
+    "points": 100
+  },
+  {
+    "name": "100 apoios",
+    "type": "support",
+    "number": 100,
+    "points": 200
+  }
+]

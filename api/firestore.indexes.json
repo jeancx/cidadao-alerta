@@ -1,0 +1,32 @@
+{
+  "indexes": [
+    {
+      "collectionId": "reports",
+      "fields": [
+        {
+          "fieldPath": "createdAt",
+          "mode": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionId": "users",
+      "fields": [
+        {
+          "fieldPath": "createdAt",
+          "mode": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionId": "categories",
+      "fields": [
+        {
+          "fieldPath": "name",
+          "mode": "ASCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

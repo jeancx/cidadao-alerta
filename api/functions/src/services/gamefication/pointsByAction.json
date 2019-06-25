@@ -1,0 +1,18 @@
+{
+  "report": {
+    "points": 50,
+    "multiplierByLevel": [1, 1, 2, 1, 1, 2, 2, 3, 4, 4]
+  },
+  "comment": {
+    "points": 20,
+    "multiplierByLevel": [1, 1, 1, 1, 1, 2, 2, 3, 4, 4]
+  },
+  "solved": {
+    "points": 50,
+    "multiplierByLevel": [1, 1, 1, 1, 2, 2, 2, 3, 4, 4]
+  },
+  "denounced": {
+    "points": 2,
+    "multiplierByLevel": [1, 1, 1, 1, 1, 2, 2, 3, 4, 4]
+  }
+}
