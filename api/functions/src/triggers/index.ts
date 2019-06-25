@@ -10,12 +10,13 @@ const onReportMark = functions.firestore.document('/reports/{reportId}/marks/{ma
         let solvedPointsAndWeightCount = 0;
         let solvedCount = 0;
 
+        //(Resolvidos * Peso Nível Usuário).
         marks.docs.forEach(async (mark) => {
             if (mark.data().type === 'solved') {
                 solvedCount++;
                 const user = await firestoreDB.collection('users').doc(mark.data().author.uid).get();
                 // @ts-ignore
-                solvedPointsAndWeightCount += pointsByAction[user.data().statistics.level - 1]
+                solvedPointsAndWeightCount += pointsByAction['solved'][user.data().statistics.level - 1]
             }
         });
 
