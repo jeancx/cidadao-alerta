@@ -44,8 +44,6 @@ async function requestUser(req: any, response: any, next: any) {
                 req.user = {id: user.id, ...user.data(), roles};
                 console.log(req.user)
             }
-        } else {
-            return next('No token found');
         }
     } catch (e) {
         console.log(e)
