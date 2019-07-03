@@ -3,7 +3,7 @@ import {sendMail} from '../services/mailer'
 import * as pointsByAction  from '../services/gamefication/pointsByAction.json';
 const FieldValue = require('firebase-admin').firestore.FieldValue;
 
-const onReportMark = functions.firestore.document('/reports/{reportId}/marks/{markId}}')
+const onReportMark = functions.firestore.document('reports/{reportId}/marks/{markId}}')
     .onCreate(async (data, context) => {
         const reportRef = await firestoreDB.collection('reports').doc(context.params.reportId);
         const marks = await reportRef.collection('marks').get();
