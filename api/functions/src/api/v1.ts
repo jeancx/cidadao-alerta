@@ -1,5 +1,5 @@
-import * as express from 'express';
-import * as cors from 'cors';
+import express from 'express';
+import cors from 'cors';
 import {admin, firestoreDB, functions} from '../services/firebase';
 import {changeGamificationAction} from '../services/gamefication'
 import {sendMail} from '../services/mailer';

@@ -1,5 +1,5 @@
-const pointsByAction = require('./gamefication/pointsByAction.json');
-const pointsByLevel = require('./gamefication/pointsByLevel.json');
+import * as pointsByAction from './gamefication/pointsByAction.json';
+import * as pointsByLevel from './gamefication/trophies.json';
 const trophies = require('./gamefication/trophies.json');
 import {firestoreDB} from './firebase';
 
@@ -66,9 +66,11 @@ async function saveAction(userId: string, action: string, docId: string, points:
 }
 
 function calcLevel(experience: number) {
+    // @ts-ignore
     return pointsByLevel.reduce((levelSum: number, level: any) => ((experience >= level.points) ? levelSum + 1 : levelSum), 0)
 }
 
 function calcPointsByAction(action: string, level = 1) {
+    // @ts-ignore
     return pointsByAction[action].points * pointsByAction[action].multiplierByLevel[level - 1]
 }

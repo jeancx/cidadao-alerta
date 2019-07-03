@@ -1,6 +1,6 @@
 import {firestoreDB, functions} from '../services/firebase'
 import {sendMail} from '../services/mailer'
-const pointsByAction = require('../services/gamefication/pointsByAction.json');
+import * as pointsByAction  from '../services/gamefication/pointsByAction.json';
 const FieldValue = require('firebase-admin').firestore.FieldValue;
 
 const onReportMark = functions.firestore.document('/reports/{reportId}/marks/{markId}}')
@@ -44,7 +44,3 @@ const onReportMark = functions.firestore.document('/reports/{reportId}/marks/{ma
     });
 
 export default {onReportMark}
-
-
-
-
