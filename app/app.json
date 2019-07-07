@@ -38,7 +38,6 @@
         "foregroundImage": "src/assets/images/adaptive_icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "playStoreUrl": "",
       "config": {
         "googleMaps": {
           "apiKey": ""

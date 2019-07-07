@@ -1,4 +1,4 @@
-import { DropDownHolder } from 'components/DropdownHolder'
+import DropDownHolder from 'components/DropdownHolder'
 import Popup from 'components/Popup'
 import ErrorMessages from 'constants/errors'
 import { Body, Card, CardItem, Container, Content, Fab, Icon, Text, Thumbnail, Toast } from 'native-base'

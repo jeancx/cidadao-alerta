@@ -1,12 +1,13 @@
 {
   "projects": {
-    "default": "cidadao-alerta-2019"
+    "default": "cidadao-alerta-dev",
+    "cidadao-alerta-dev": "cidadao-alerta-dev"
   },
   "targets": {
-    "cidadao-alerta-2019": {
+    "cidadao-alerta-dev": {
       "hosting": {
-        "app": [
-          "cidadao-alerta-2019"
+        "dashboard": [
+          "cidadao-alerta-dev"
         ]
       }
     }

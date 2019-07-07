@@ -5,7 +5,7 @@ import pointsByLevel from './gamefication/pointsByLevel.json'
 import trophies from './gamefication/trophies'
 import bugsnagClient, { buildError, notifyUser } from 'services/bugsnag'
 import { ToastAndroid } from 'react-native'
-import { DropDownHolder } from 'components/DropdownHolder'
+import DropDownHolder from 'components/DropdownHolder'
 
 export function changeGamificationAction (docId, action, number, user) {
   return async dispatch => {

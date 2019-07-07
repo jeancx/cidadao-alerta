@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "target": "app",
+    "target": "dashboard",
     "public": "build",
     "ignore": [
       "firebase.json",

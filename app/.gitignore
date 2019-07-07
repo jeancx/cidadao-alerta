@@ -6,7 +6,6 @@ npm-debug.*
 *.key
 *.mobileprovision
 /.idea
-/firebase.json
 /.expo-shared
 /yarn.lock
 /package-lock.json
