@@ -1,7 +1,7 @@
 import firebase from 'firebase'
 import 'firebase/firestore'
-import config from '../../firebase.json'
 import * as geofirex from 'geofirex'
+import config from '../../firebase.json'
 
 firebase.initializeApp(config)
 
