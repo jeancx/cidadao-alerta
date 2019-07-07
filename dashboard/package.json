@@ -34,12 +34,12 @@
     "styled-components": "^4.3.0"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "env-cmd .env.development react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "env-cmd .env.test react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "deploy:dev": "npm run build && firebase use staging && firebase deploy --only hosting:dashboard",
-    "deploy:prod": "npm run build && firebase use production && firebase deploy --only hosting:dashboard"
+    "deploy:dev": "env-cmd .env.development npm run build && firebase use staging && firebase deploy --only hosting:dashboard",
+    "deploy:prod": "env-cmd .env.production npm run build && firebase use production && firebase deploy --only hosting:dashboard"
   },
   "browserslist": [
     ">0.2%",
