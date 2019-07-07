@@ -20,4 +20,7 @@ node_modules/
 .node_repl_history
 *.tgz
 .yarn-integrity
-*.env.*
+/.env.*
+/.env.development
+/.env.production
+/.env.test

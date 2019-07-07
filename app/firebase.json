@@ -1,9 +1,0 @@
-{
-  "apiKey": "",
-  "authDomain": "cidadao-alerta-dev.firebaseapp.com",
-  "databaseURL": "https://cidadao-alerta-dev.firebaseio.com",
-  "projectId": "cidadao-alerta-dev",
-  "storageBucket": "cidadao-alerta-dev.appspot.com",
-  "messagingSenderId": "",
-  "appId": ""
-}
