@@ -7,7 +7,6 @@
     "@material-ui/icons": "~1.1.1",
     "classnames": "~2.2.5",
     "date-fns": "^1.29.0",
-    "dotenv-webpack": "^1.7.0",
     "firebase": "^6.0.4",
     "google-map-react": "^1.1.4",
     "inflection": "~1.12.0",
