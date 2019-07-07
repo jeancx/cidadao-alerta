@@ -6,8 +6,6 @@ import _ from 'lodash'
 import { CREATE } from 'react-admin'
 import sortBy from 'sort-by'
 
-const currentUser = firebase.auth().currentUser
-
 const convertFileToBase64 = file =>
   new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -155,6 +153,7 @@ const getOne = async (params, resourceName) => {
 const getList = async (params, resource) => {
   let values = []
   let query = firebase.firestore()
+  const currentUser = firebase.auth().currentUser
 
   if (typeof resource === 'string') {
     query = query.collection(resource)

@@ -1,10 +1,9 @@
-import React from 'react'
 import { Button, Footer, FooterTab, Icon } from 'native-base'
+import React from 'react'
 import { createMaterialTopTabNavigator } from 'react-navigation'
-
-import Timeline from 'screens/Timeline'
-import ReportsMap from 'screens/ReportsMap'
 import Profile from 'screens/Profile'
+import ReportsMap from 'screens/ReportsMap'
+import Timeline from 'screens/Timeline'
 
 import styles from './styles'
 

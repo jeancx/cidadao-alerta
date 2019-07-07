@@ -1,0 +1,76 @@
+{
+  "expo": {
+    "name": "Cidadão Alerta Dev",
+    "slug": "cidadao-alerta-dev",
+    "privacy": "public",
+    "sdkVersion": "32.0.0",
+    "platforms": [
+      "ios",
+      "android"
+    ],
+    "version": "1.0.25",
+    "orientation": "portrait",
+    "icon": "src/assets/images/icon.png",
+    "splash": {
+      "image": "src/assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "notification": {
+      "icon": "src/assets/images/notification_icon.png",
+      "color": "#ffffff",
+      "androidMode": "collapse",
+      "androidCollapsedTitle": "#{unread_notifications} novas interações"
+    },
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "org.cidadaoalerta.app.dev",
+      "versionCode": 17,
+      "googleServicesFile": "./google-services.json",
+      "adaptiveIcon": {
+        "foregroundImage": "src/assets/images/adaptive_icon.png",
+        "backgroundColor": "#FFFFFF"
+      },
+      "playStoreUrl": "",
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        },
+        "googleSignIn": {
+          "apiKey": "",
+          "certificateHash": ""
+        }
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "org.cidadaoalerta.app.dev",
+      "supportsTablet": true,
+      "config": {
+        "googleMapsApiKey": "",
+        "googleSignIn": {
+          "reservedClientId": ""
+        }
+      }
+    },
+    "extra": {
+      "bugsnag": {
+        "apiKey": ""
+      }
+    },
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "@bugsnag/expo/hooks/post-publish.js",
+          "config": {}
+        }
+      ]
+    }
+  }
+}

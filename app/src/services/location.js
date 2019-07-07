@@ -12,6 +12,4 @@ export async function getCurrentLocation () {
     let location = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High })
     return location.coords
   }
-
-  return false
 }

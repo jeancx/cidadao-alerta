@@ -3,11 +3,13 @@ import Timeago from 'components/Timeago'
 import Images from 'constants/images'
 import { MapView } from 'expo'
 import {
-  Body, Button, Card, CardItem, Container, Content, Header, Icon, Left, List, ListItem, Right, Text, Thumbnail, Title
+  Badge, Body, Button, Card, CardItem, Container, Content, Header, Icon, Left, List, ListItem, Right, Text, Thumbnail,
+  Title
 } from 'native-base'
 import React from 'react'
 import {
-  Alert, Image, KeyboardAvoidingView, ListView, Modal, RefreshControl, TextInput, TouchableOpacity, View
+  Alert, Image, InteractionManager, KeyboardAvoidingView, ListView, Modal, RefreshControl, TextInput, TouchableOpacity,
+  View
 } from 'react-native'
 import HeaderImageScrollView from 'react-native-image-header-scroll-view'
 import Lightbox from 'react-native-lightbox'
@@ -43,7 +45,9 @@ class Report extends React.PureComponent {
   }
 
   componentDidMount () {
-    this.loadComments()
+    InteractionManager.runAfterInteractions(() => {
+      this.loadComments()
+    })
   }
 
   loadComments = async () => {
@@ -112,8 +116,10 @@ class Report extends React.PureComponent {
             </View>
           </Body>
         </CardItem>
-        <CardItem bordered button onPress={() => { this.setState({ mapModalIsVisible: true })}}>
-          <Button icon transparent><Icon name="pin" style={{ color: '#007aff' }}/></Button>
+        <CardItem bordered>
+          <Button icon transparent title="Localização" onPress={() => { this.setState({ mapModalIsVisible: true })}}>
+            <Icon name="pin" style={{ color: '#007aff' }}/>
+          </Button>
           <Text>{Utils.buildAddressString(report.address)}</Text>
         </CardItem>
         <CardItem bordered>
@@ -174,7 +180,12 @@ class Report extends React.PureComponent {
   renderCommentRow = (comment, index) => (
     <ListItem key={index} style={styles.listItem} avatar noBorder>
       <Left style={styles.listItemLeft}>
-        <Thumbnail source={this.getUserAvatar(comment.author)}/>
+        <Thumbnail source={this.getUserAvatar(comment.author)} large={comment.author.prefecture}/>
+        {comment.author.prefecture && (
+          <Badge success style={{ position: 'absolute', right: 0, bottom: 0, opacity: .9 }}>
+            <Text>LV. 2</Text>
+          </Badge>
+        )}
       </Left>
       <Body>
         <Text>{comment.author ? comment.author.displayName : 'Não informado'}</Text>
@@ -197,7 +208,7 @@ class Report extends React.PureComponent {
   )
 
   renderAddCommentForm () {
-    const { report, user } = this.props
+    const { report, user, addComment } = this.props
     const { comment } = this.state
 
     return (
@@ -216,7 +227,7 @@ class Report extends React.PureComponent {
           </View>
         </Body>
         <Right>
-          <Button icon transparent onPress={() => this.props.addComment(report, comment, user)} disabled={!comment}>
+          <Button onPress={() => addComment(report, comment, user)} disabled={!comment} title="Comentar">
             <Icon name='send'/>
           </Button>
         </Right>
@@ -319,12 +330,26 @@ class Report extends React.PureComponent {
 
               {this.renderMapModal()}
 
-              <MarkSolved visible={markSolvedIsVisible} user={user} report={report} save={saveMarkOnReport}
-                          close={this.closeMarkSolved}/>
-              <MarkDenounced visible={markDenouncedIsVisible} user={user} report={report} save={saveMarkOnReport}
-                             close={this.closeMarkDenounced}/>
-              <EditComment visible={editCommentIsVisible} comment={editComment} close={this.closeEditComment}
-                           save={(comment) => updateComment(comment, report, user)}/>
+              <MarkSolved
+                visible={markSolvedIsVisible}
+                user={user}
+                report={report}
+                save={saveMarkOnReport}
+                close={this.closeMarkSolved}
+              />
+              <MarkDenounced
+                visible={markDenouncedIsVisible}
+                user={user}
+                report={report}
+                save={saveMarkOnReport}
+                close={this.closeMarkDenounced}
+              />
+              <EditComment
+                visible={editCommentIsVisible}
+                comment={editComment}
+                close={this.closeEditComment}
+                save={(comment) => updateComment(comment, report, user)}
+              />
 
               <Loading isLoading={this.props.isLoading}/>
             </Content>

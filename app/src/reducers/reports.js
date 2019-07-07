@@ -8,7 +8,8 @@ export const initialState = {
     geolocation: {},
     address: {},
     snapshot: ''
-  }
+  },
+  answers: {}
 }
 
 export default function reports (state = initialState, action) {
@@ -64,6 +65,15 @@ export default function reports (state = initialState, action) {
             }
             return report
           })
+        }
+      }
+      return state
+    }
+    case 'REPORTS_ANSWERS_UPDATE': {
+      if (action.data) {
+        return {
+          ...state,
+          answers: { ...state.answers, [action.data.reportId]: new Date() }
         }
       }
       return state

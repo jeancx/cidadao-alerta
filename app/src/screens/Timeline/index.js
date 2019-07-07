@@ -1,42 +1,32 @@
-import React from 'react'
-import { connect } from 'react-redux'
-import { ActivityIndicator, Alert, FlatList, InteractionManager, NetInfo } from 'react-native'
-import { Body, Button, Card, CardItem, Container, Content, Fab, Icon, Left, Text, Thumbnail, Toast } from 'native-base'
-import { Menu, MenuOption, MenuOptions, MenuTrigger } from 'react-native-popup-menu'
-import { Image } from 'react-native-elements'
-
-import ErrorMessages from 'constants/errors'
-import Images from 'constants/images'
-import Utils from 'services/utils'
-
-import Report from 'screens/Report'
-import ReportForm from 'screens/ReportForm'
-import MarkSolved from 'screens/Modals/MarkSolved'
-import MarkDenounced from 'screens/Modals/MarkDenounced'
 import { DropDownHolder } from 'components/DropdownHolder'
-
-import styles from './styles'
-import {
-  deleteReport,
-  fetchCategories,
-  fetchNearReports,
-  fetchUser,
-  reportActionTypeChange,
-  resetLoading,
-  saveMarkOnReport,
-  shareReport
-} from './actions'
+import Popup from 'components/Popup'
+import ErrorMessages from 'constants/errors'
+import { Body, Card, CardItem, Container, Content, Fab, Icon, Text, Thumbnail, Toast } from 'native-base'
+import React from 'react'
+import { ActivityIndicator, FlatList, InteractionManager, NetInfo } from 'react-native'
 import { NavigationActions } from 'react-navigation'
+import { connect } from 'react-redux'
+import ReportForm from 'screens/ReportForm'
+import Utils from 'services/utils'
+import {
+  answerReport, deleteReport, fetchCategories, fetchNearReports, fetchUser, reportActionTypeChange, resetLoading,
+  saveMarkOnReport, shareReport
+} from './actions'
+import ReportCard from './ReportCard'
+import styles from './styles'
 
 const ITEMS_PER_PAGE = 6
 
 class Timeline extends React.PureComponent {
   state = {
-    markSolvedIsVisible: false,
-    markDenouncedIsVisible: false,
+    popupVisible: false,
+    markSolvedVisible: false,
+    markDenouncedVisible: false,
     refreshing: false,
     report: {},
-    lastRefresh: null
+    lastRefresh: null,
+    answerReport: null,
+    answered: false
   }
 
   componentDidMount () {
@@ -57,8 +47,19 @@ class Timeline extends React.PureComponent {
   }
 
   componentDidUpdate () {
-    const { user, navigation } = this.props
-    if (!user.isAuthenticated) navigation.reset([NavigationActions.navigate({ routeName: 'Login' })], 0)
+    const { user, navigation, reports, answers } = this.props
+    const { popupVisible, answered } = this.state
+    if (!user.isAuthenticated) {
+      navigation.reset([NavigationActions.navigate({ routeName: 'Login' })], 0)
+    }
+
+    if (reports && !answered && !popupVisible) {
+      reports.forEach(report => {
+        if (!answers[report.id] && report.distance <= 25) {
+          this.setState({ answerReport: report, popupVisible: true, answered: true })
+        }
+      })
+    }
   }
 
   refreshAndWait = async () => {
@@ -79,99 +80,45 @@ class Timeline extends React.PureComponent {
     }
   }
 
-  supportReport = (reportId) => this.props.reportActionTypeChange(reportId, 'support', this.props.user)
-  openReport = (reportId) => this.props.navigation.navigate('Report', { reportId })
   openNewReport = () => this.props.navigation.navigate('ReportForm')
-  openEditReport = (report) => this.props.navigation.navigate('ReportForm', { report: report })
-  getUserAvatar = (author) => author && author.photoURL ? { uri: author.photoURL } : Images.blankAvatar
-  openMarkSolved = (report) => this.setState({ report, markSolvedIsVisible: true })
-  closeMarkSolved = () => this.setState({ report: {}, markSolvedIsVisible: false })
-  openMarkDenounced = (report) => this.setState({ report, markDenouncedIsVisible: true })
-  closeMarkDenounced = () => this.setState({ report: {}, markDenouncedIsVisible: false })
+  closePopup = () => {
+    this.props.answerReport(this.state.answerReport.id)
+    this.setState({ popupVisible: false, answerReport: null })
+  }
 
-  renderActionButton = (report, type) => {
-    const { user, shareReport } = this.props
-    const userStatistics = user.profile && user.profile.statistics ? user.profile.statistics : {}
-    const done = Array.isArray(userStatistics[type]) ? userStatistics[type].indexOf(report.id) !== -1 : false
-    const buttons = {
-      support: { iconDone: 'heart', iconNotDone: 'heart-outline', onPress: () => this.supportReport(report.id) },
-      comment: { iconDone: 'comment', iconNotDone: 'comment-outline', onPress: () => this.openReport(report.id) },
-      share: { iconDone: 'share', iconNotDone: 'share-outline', onPress: () => shareReport(report, user) },
+  markSolved = () => {
+    const { answerReport } = this.state
+    this.props.saveMarkOnReport('solved', answerReport, {}, this.props.user)
+    this.closePopup()
+  }
+
+  renderAnswerReport = () => {
+    const report = this.state.answerReport
+    if (report) {
+      return (
+        <React.Fragment>
+          <Thumbnail
+            square
+            large
+            source={{ uri: report.pictures[0] }}
+            style={{ marginRight: 5, flex: 30 }}
+          />
+          <Text style={{ flex: 70 }}>
+            <Text style={{ fontWeight: 'bold' }}>Este relato foi resolvido?{'\n'}</Text>
+            <Text>{Utils.limitText(report.description, 30)}</Text>
+          </Text>
+        </React.Fragment>
+      )
+    } else {
+      return (<React.Fragment/>)
     }
-    const actionIcon = (type) => done ? buttons[type].iconDone : buttons[type].iconNotDone
-    const iconType = 'MaterialCommunityIcons'
-
-    return (
-      <Button iconLeft transparent onPress={buttons[type].onPress}>
-        <Icon name={actionIcon(type)} type={iconType}/>
-        <Text>({report.statistics && report.statistics[type] > 0 ? report.statistics[type] : 0})</Text>
-      </Button>
-    )
-  }
-
-  deleteReport = (report, uid) => {
-    Alert.alert(
-      Utils.limitText(report.description, 30),
-      'Deseja excluir este Relato permanentemente?',
-      [
-        { text: 'Confirmar', onPress: () => this.props.deleteReport(report.id, uid) },
-        { text: 'Cancelar', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-      ],
-      { cancelable: true }
-    )
-  }
-
-  renderMenu = (report) => {
-    const { uid } = this.props.user
-
-    return (
-      <Menu>
-        <MenuTrigger>
-          <Icon name="more" style={{ margin: 5, padding: 5, color: '#5067FF' }}/>
-        </MenuTrigger>
-        <MenuOptions>
-          <MenuOption onSelect={() => this.openMarkSolved(report)} text="Marcar como Resolvido"/>
-          <MenuOption onSelect={() => this.openMarkDenounced(report)} text={'Denunciar'}/>
-          {report.userId === uid && (<MenuOption onSelect={() => this.openEditReport(report)} text={'Editar'}/>)}
-          {report.userId === uid && (<MenuOption onSelect={() => this.deleteReport(report, uid)} text={'Deletar'}/>)}
-        </MenuOptions>
-      </Menu>
-    )
-  }
-
-  renderReport = (item) => {
-    const report = item.item
-
-    return (
-      <Card key={report.id} style={{ marginBottom: (item.index + 1 === this.props.reports.length ? 100 : 0) }}>
-        <CardItem bordered>
-          <Left>
-            <Thumbnail source={this.getUserAvatar(report.author)}/>
-            <Body>
-              <Text>{Utils.limitText(report.description, 30)}</Text>
-              <Text note>{report.author && report.author.displayName ? report.author.displayName : ''}</Text>
-            </Body>
-          </Left>
-        </CardItem>
-        <CardItem cardBody button onPress={() => this.openReport(report.id)}
-                  style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }} activeOpacity={1}>
-          <Image source={{ uri: report.pictures[0] }} style={styles.img} PlaceholderContent={<ActivityIndicator/>}/>
-        </CardItem>
-        <CardItem bordered>
-          {this.renderActionButton(report, 'support')}
-          {this.renderActionButton(report, 'comment')}
-          {this.renderActionButton(report, 'share')}
-          {this.renderMenu(report)}
-        </CardItem>
-      </Card>
-    )
   }
 
   renderFooter = () => (this.state.refreshing ? <ActivityIndicator/> : null)
 
   render () {
-    const { reports, user, saveMarkOnReport } = this.props
-    const { refreshing, newReportIsVisible, markSolvedIsVisible, markDenouncedIsVisible, report } = this.state
+    const { reports } = this.props
+    const { refreshing, popupVisible } = this.state
 
     return (
       <Container>
@@ -197,7 +144,7 @@ class Timeline extends React.PureComponent {
               initialNumToRender={ITEMS_PER_PAGE}
               onEndReachedThreshold={0.1}
               refreshing={refreshing}
-              renderItem={this.renderReport}
+              renderItem={({ item }) => (<ReportCard report={item}/>)}
               keyExtractor={item => item.id}
               onEndReached={this.refreshAndWait}
               ListFooterComponent={this.renderFooter}
@@ -209,10 +156,16 @@ class Timeline extends React.PureComponent {
             <Icon name="add" style={{ color: 'white' }}/>
           </Fab>
 
-          <MarkSolved visible={markSolvedIsVisible} user={user} report={report} save={saveMarkOnReport}
-                      close={this.closeMarkSolved}/>
-          <MarkDenounced visible={markDenouncedIsVisible} user={user} report={report} save={saveMarkOnReport}
-                         close={this.closeMarkDenounced}/>
+          <Popup
+            visible={popupVisible}
+            confirmTitle="Sim"
+            cancelTitle="Não"
+            close={this.closePopup}
+            cancel={this.closePopup}
+            confirm={this.markSolved}
+          >
+            {this.renderAnswerReport()}
+          </Popup>
         </Content>
       </Container>
     )
@@ -225,11 +178,12 @@ class Timeline extends React.PureComponent {
 
 const mapStateToProps = state => ({
   user: state.user,
-  reports: state.reports.list
+  reports: state.reports.list,
+  answers: state.reports.answers
 })
 const mapDispatchToProps = {
   fetchNearReports, reportActionTypeChange, shareReport, deleteReport,
-  saveMarkOnReport, fetchCategories, fetchUser, resetLoading
+  saveMarkOnReport, fetchCategories, fetchUser, resetLoading, answerReport
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Timeline)

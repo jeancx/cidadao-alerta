@@ -39,6 +39,23 @@ function sortByName (array) {
   return array.sort((a, b) => (a.name).localeCompare(b.name, 'en', { sensitivity: 'base' }))
 }
 
+function calculateDistance (lat1, lat2, lon1, lon2) {
+  if ((lat1 === lat2) && (lon1 === lon2)) {
+    return 0
+  } else {
+    const radLat1 = Math.PI * lat1 / 180
+    const radLat2 = Math.PI * lat2 / 180
+    const theta = lon1 - lon2
+    const radTheta = Math.PI * theta / 180
+    let distance = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta)
+    distance = Math.acos(distance > 1 ? 1 : distance)
+    distance = distance * 180 / Math.PI
+    distance = distance * 60 * 1.1515
+
+    return distance * 1.609344
+  }
+}
+
 export function resetLoading () {
   try {
     return dispatch => MessagesAction(dispatch, 'loading', false)
@@ -57,10 +74,17 @@ export function fetchUser (user) {
 export function fetchNearReports () {
   return async dispatch => {
     try {
-      const location = await getCurrentLocation()
+      const userLocation = await getCurrentLocation()
       const reportsRef = geo.collection('reports')
-      const query = reportsRef.within(geo.point(location.latitude, location.longitude), 50, 'location')
+      const query = reportsRef.within(geo.point(userLocation.latitude, userLocation.longitude), 50, 'location')
       const reports = await get(query)
+
+      reports.forEach(function(report) {
+        report.distance = calculateDistance(
+          report.location.geopoint._lat, userLocation.latitude,
+          report.location.geopoint._long, userLocation.longitude
+        )
+      })
 
       dispatch({
         type: 'REPORTS_UPDATE',
@@ -162,6 +186,10 @@ export function saveMarkOnReport (type, report, model, user) {
         }))
       }
 
+      if (type === 'solved') {
+        answerReport(report.id)
+      }
+
       if (docsSnapshot.docs.length <= 0) {
         await dispatch(changeReportStatistics(report.id, type, 1, user))
         await dispatch(reportActionTypeChange(report.id, type, user))
@@ -198,5 +226,11 @@ export function reportActionTypeChange (docId, action, user) {
         error, buildError('error', 'reportActionTypeChange', { docId, action, user })
       )
     }
+  }
+}
+
+export function answerReport (reportId) {
+  return async dispatch => {
+    dispatch({ type: 'REPORTS_ANSWERS_UPDATE', data: { reportId } })
   }
 }

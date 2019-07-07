@@ -1,11 +1,17 @@
-const AlertType = 'info' | 'warn' | 'error' | 'success'
+type AlertType = 'info' | 'warn' | 'error' | 'success'
+
+export type DropdownType = {
+  alertWithType: (type: AlertType, title: string, message: string) => void
+}
 
 export class DropDownHolder {
-  static setDropDown (dropDown) {
+  static dropDown: DropdownType
+
+  static setDropDown (dropDown: DropdownType) {
     this.dropDown = dropDown
   }
 
-  static alert (type, title, message) {
+  static alert (type: AlertType, title: string, message: string) {
     this.dropDown.alertWithType(type, title, message)
   }
 }

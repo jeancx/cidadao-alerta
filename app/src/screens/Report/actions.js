@@ -11,7 +11,10 @@ export function loadReportComments (report) {
       const docsSnapshot = await commentsRef.orderBy('createdAt', 'desc').get()
       let comments = []
       await docsSnapshot.docs.forEach(async (doc) => {
-        comments.push({ id: doc.id, ...await doc.data() })
+        const comment = { id: doc.id, ...await doc.data() }
+        comment.author.prefecture
+          ? comments.unshift(comment)
+          : comments.push(comment)
       })
 
       dispatch({ type: 'REPORT_CHANGE', data: { report: { ...report, comments } } })

@@ -1,31 +1,26 @@
-import React from 'react'
-import { Font, AppLoading } from 'expo'
-import { Provider } from 'react-redux'
-import { PersistGate } from 'redux-persist/es/integration/react'
-import { StyleProvider } from 'native-base'
-import { ThemeProvider } from 'react-native-elements'
-import { YellowBox } from 'react-native'
-import { createAppContainer } from 'react-navigation'
-import { MenuProvider } from 'react-native-popup-menu'
 import bugsnag from '@bugsnag/expo'
-
 import rootStack from 'app/navigator'
 import configureStore from 'app/store'
 import getTheme from 'assets/native-base-theme/components'
 import theme from 'assets/native-base-theme/variables/commonColor'
-import DropdownAlert from 'react-native-dropdownalert'
 import { DropDownHolder } from 'components/DropdownHolder'
+import { AppLoading, Font } from 'expo'
+import { StyleProvider } from 'native-base'
+import React from 'react'
+import DropdownAlert from 'react-native-dropdownalert'
+import { ThemeProvider } from 'react-native-elements'
+import { MenuProvider } from 'react-native-popup-menu'
+import { createAppContainer } from 'react-navigation'
+import { Provider } from 'react-redux'
+import { PersistGate } from 'redux-persist/es/integration/react'
 
 const bugsnagClient = bugsnag()
 const { persistor, store } = configureStore()
 const AppContainer = createAppContainer(rootStack)
+console.disableYellowBox = true
 
 export default class App extends React.PureComponent {
   state = { isReady: false }
-
-  componentDidMount () {
-    YellowBox.ignoreWarnings(['Setting a timer'])
-  }
 
   loadResourcesAsync = async () => {
     await Font.loadAsync({
