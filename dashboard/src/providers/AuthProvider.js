@@ -5,19 +5,16 @@ import { AUTH_CHECK, AUTH_GET_PERMISSIONS, AUTH_LOGIN, AUTH_LOGOUT } from 'react
 
 const baseConfig = {
   profilePath: '/users/',
-  rolesPath: '/roles/',
-  allowedRoles: ['superadmin', 'admin'],
+  allowedRoles: ['superAdmin', 'admin', 'prefecture', 'moderator'],
   localStorageTokenName: 'FirebaseClientToken',
   handleAuthStateChange: async (auth, config) => {
     if (auth) {
       const uid = auth.uid || auth.user.uid
-      const profileSnapshot = await firebase.firestore().doc(config.profilePath + uid).get()
-      const profile = await profileSnapshot.data()
-      const rolesSnapshot = await firebase.firestore().doc(config.rolesPath + uid).get()
-      const roles = await rolesSnapshot.data()
+      const profile = await (await firebase.firestore().collection('users').doc(uid).get()).data()
+      const roles = (await auth.getIdTokenResult()).claims
 
       if (roles && config.allowedRoles.some(role => roles[role])) {
-        const firebaseToken = await auth.user.getIdToken()
+        const firebaseToken = await auth.getIdToken()
         localStorage.setItem(config.localStorageTokenName, firebaseToken)
         localStorage.setItem('roles', btoa(JSON.stringify(roles)))
         return { auth, profile, roles, firebaseToken }
