@@ -1,7 +1,8 @@
 import * as pointsByAction from './gamefication/pointsByAction.json';
 import * as pointsByLevel from './gamefication/trophies.json';
-const trophies = require('./gamefication/trophies.json');
 import {firestoreDB} from './firebase';
+
+const trophies = require('./gamefication/trophies.json');
 
 export async function changeGamificationAction(docId: string, action: string, userId: any) {
     try {
@@ -12,7 +13,7 @@ export async function changeGamificationAction(docId: string, action: string, us
             statistics[action] = statistics[action].filter((itemId: string) => itemId !== docId);
             statistics.experience = statistics.experience + points;
             statistics.level = calcLevel(statistics.experience);
-            statistics = trophiesService(user, statistics);
+            if (!user.customClaims.prefecture) statistics = trophiesService(user, statistics);
             return {statistics}
         };
 

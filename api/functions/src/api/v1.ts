@@ -12,37 +12,31 @@ main.use(cors({origin: true}));
 main.use('/v1', app);
 main.use(express.json());
 
-async function requestUser(req: any, response: any, next: any) {
+async function requestUser(req: any, resp: any, next: any) {
     try {
-        const apiKey = req.query.api_key;
+        let token = req.query.api_key || req.headers.authorization;
+        if (token.startsWith('Bearer ')) token = token.slice(7, token.length);
 
-        if (req.url === '/reports' && apiKey) {
-            const snapshot = await firestoreDB.collection('prefectures').where('apiKey', '==', apiKey).get();
+        if (req.query.api_key || req.headers.authorization) {
+            const decodedToken = await admin.auth().verifyIdToken(token);
 
-            if (snapshot.docs.length > 0) {
-                const prefecture = snapshot.docs[0];
-                const user = await firestoreDB.collection('users').doc(prefecture.id).get();
-                const rolesSnapshot = await firestoreDB.collection('roles').doc(prefecture.id).get();
-                const roles = rolesSnapshot.data();
+            if (decodedToken.uid) {
+                let prefecture = {};
+                const auth = await admin.auth().getUser(decodedToken.uid);
+                const user = await firestoreDB.collection('users').doc(auth.uid).get();
+                const claims = auth.customClaims;
 
-                if (roles && roles.prefecture) {
-                    req.user = {id: user.id, ...user.data(), roles, prefecture: prefecture.data()};
+                // @ts-ignore
+                if (claims && claims.prefecture) {
+                    prefecture = await firestoreDB.collection('prefectures').doc(auth.uid).get();
+                    // @ts-ignore
+                    prefecture = prefecture.data();
                 }
-            }
-        }
 
-        if (req.headers.authorization) {
-            let token = req.headers.authorization;
-            token = token.slice(7, token.length);
-
-            const auth = await admin.auth().verifyIdToken(token);
-            const user = await firestoreDB.collection('users').doc(auth.id).get();
-            const rolesSnapshot = await firestoreDB.collection('roles').doc(auth.id).get();
-            const roles = rolesSnapshot.data();
-
-            if (roles && (roles.superadmin || roles.admin || roles.prefecture || roles.moderator)) {
-                req.user = {id: user.id, ...user.data(), roles};
-                console.log(req.user)
+                // @ts-ignore
+                if (claims && (claims.superAdmin || claims.admin || claims.prefecture || claims.moderator)) {
+                    req.user = {...auth, user: user.data(), claims, prefecture};
+                }
             }
         }
     } catch (e) {
@@ -51,10 +45,10 @@ async function requestUser(req: any, response: any, next: any) {
     return next()
 }
 
-async function verifyAuth(req: any, response: any, next: any) {
+async function verifyAuth(req: any, resp: any, next: any) {
     try {
         const originIsAllowed = req.headers.origin && req.headers.origin.endsWith('cidadaoalerta.org');
-        const isPrefecture = req.user && req.user.roles && req.user.roles.prefecture;
+        const isPrefecture = req.user && req.user.claims && req.user.claims.prefecture;
         let authenticated = false;
         let token = req.headers.authorization;
         if (token) {
@@ -65,19 +59,19 @@ async function verifyAuth(req: any, response: any, next: any) {
 
         if (originIsAllowed || isPrefecture || authenticated) return next()
     } catch (error) {
-        return response.status(500).send(error);
+        return resp.status(500).send(error);
     }
 
-    return response.status(401).send({auth: false, message: 'Acesso negado!'});
+    return resp.status(401).send({auth: false, message: 'Acesso negado!'});
 }
 
 app.use(requestUser);
 
-app.get('/', (req, response) => {
-    response.send('Cidadão Alerta - API');
+app.get('/', (req, resp) => {
+    resp.send('Cidadão Alerta - API');
 });
 
-app.get('/reports', verifyAuth, async (req, response) => {
+app.get('/reports', verifyAuth, async (req, resp) => {
     try {
         const updatedAt = req.query.updated_at;
         let query = firestoreDB.collection('reports').orderBy('updatedAt', 'desc');
@@ -85,26 +79,21 @@ app.get('/reports', verifyAuth, async (req, response) => {
 
         // @ts-ignore
         const {user} = req;
-
-        if (user && user.roles && user.roles.prefecture && user.prefecture && user.prefecture.city) {
-            query.where('address.city', '==', user.prefecture.city)
-        }
-
-        if (user && user.roles && user.roles.moderator && user.address && user.address.city) {
-            query.where('address.city', '==', user.address.city)
+        if (user && user.claims && (user.claims.prefecture || user.claims.moderator)) {
+            query.where('address.city', '==', user.claims.city)
         }
 
         const items: any = [];
         const querySnapshot = await query.get();
         querySnapshot.forEach((doc: any) => items.push({id: doc.id, ...doc.data()}));
 
-        response.json(items);
+        resp.json(items);
     } catch (error) {
-        response.status(500).send(error);
+        resp.status(500).send(error);
     }
 });
 
-app.get('/reports/:id', verifyAuth, async (req, response) => {
+app.get('/reports/:id', verifyAuth, async (req, resp) => {
     try {
         const id = req.params.id;
 
@@ -112,15 +101,15 @@ app.get('/reports/:id', verifyAuth, async (req, response) => {
 
         const doc = await firestoreDB.collection('reports').doc(id).get();
 
-        if (!doc.exists) response.status(404).send('Relato não encontrado.');
+        if (!doc.exists) resp.status(404).send('Relato não encontrado.');
 
-        response.json({id: doc.id, ...doc.data()});
+        resp.json({id: doc.id, ...doc.data()});
     } catch (error) {
-        response.status(500).send(error);
+        resp.status(500).send(error);
     }
 });
 
-app.post('/reports/:reportId/comments/:commentId', verifyAuth, async (req, response) => {
+app.delete('/reports/:reportId/comments/:commentId', verifyAuth, async (req, resp) => {
     try {
         const reportId = req.params.reportId;
         const commentId = req.params.commentId;
@@ -131,24 +120,24 @@ app.post('/reports/:reportId/comments/:commentId', verifyAuth, async (req, respo
         if (!reportId && !commentId) throw new Error('Obrigatório informar ID do relato e comentário.');
         if (!reason) throw new Error('Obrigatório informar um motivo.');
 
-        if (user.roles.superadmin && user.roles.admin) {
+        if (user.claims.superAdmin && user.claims.admin) {
             const docRef = await firestoreDB.collection('reports').doc(reportId).collection('comments').doc(reportId);
 
             if (await docRef.update({deletedAt: FieldValue.serverTimestamp(), reason})) {
                 // @ts-ignore
-                await changeGamificationAction(doc.id, 'comment', -1, doc.data().author.userId);
+                await changeGamificationAction(doc.id, 'falseComment', doc.data().author.userId);
 
-                response.json({reportId, commentId, message: 'Excluído com sucesso'});
+                resp.json({reportId, commentId, message: 'Excluído com sucesso'});
             } else {
                 throw new Error('Erro ao excluir.');
             }
         }
     } catch (error) {
-        response.status(500).send(error);
+        resp.status(500).send(error);
     }
 });
 
-app.post('/reports/:reportId/comments', verifyAuth, async (req, response) => {
+app.post('/reports/:reportId/comments', verifyAuth, async (req, resp) => {
     try {
         const reportId = req.params.reportId;
         const text = req.body.text;
@@ -166,14 +155,15 @@ app.post('/reports/:reportId/comments', verifyAuth, async (req, response) => {
             }
         };
         const docSaved = await collectionRef.add(comment);
+        await changeGamificationAction(docSaved.id, 'prefectureComment', user.prefecture.id);
 
-        response.json({id: docSaved.id, ...comment});
+        resp.json({id: docSaved.id, ...comment});
     } catch (error) {
-        response.status(500).send(error);
+        resp.status(500).send(error);
     }
 });
 
-app.delete('/reports/:reportId', verifyAuth, async (req, response) => {
+app.delete('/reports/:reportId', verifyAuth, async (req, resp) => {
     try {
         const reportId = req.params.reportId;
         const reason = req.body.reason;
@@ -183,21 +173,21 @@ app.delete('/reports/:reportId', verifyAuth, async (req, response) => {
         if (!reportId) throw new Error('Obrigatório informar ID do relato.');
         if (!reason) throw new Error('Obrigatório informar um motivo.');
 
-        if (user.roles.superadmin || user.roles.admin) {
+        if (user.claims.superAdmin || user.claims.admin) {
             const docRef = await firestoreDB.collection('reports').doc(reportId).collection('comments').doc(reportId);
             await docRef.update({deletedAt: FieldValue.serverTimestamp(), reason});
             const doc = await docRef.get();
 
             // @ts-ignore
-            await changeGamificationAction(doc.id, 'comment', -1, doc.data().author.userId);
-            response.json({reportId, message: 'Excluído com sucesso'});
+            await changeGamificationAction(doc.id, 'falseReport', doc.data().author.userId);
+            resp.json({reportId, message: 'Excluído com sucesso'});
         }
     } catch (error) {
-        response.status(500).send(error);
+        resp.status(500).send(error);
     }
 });
 
-app.post('/reports/:reportId/marks/:markId', verifyAuth, async (req, response) => {
+app.post('/reports/:reportId/marks/:markId', verifyAuth, async (req, resp) => {
     try {
         const reportId = req.params.reportId;
         const markId = req.params.markId;
@@ -206,14 +196,14 @@ app.post('/reports/:reportId/marks/:markId', verifyAuth, async (req, response) =
 
         if (!reportId && !markId) throw new Error('Obrigatório informar ID do relato e marcação.');
 
-        if (user.roles.superadmin || user.roles.admin || user.roles.moderator) {
+        if (user.claims.superAdmin || user.claims.admin || user.claims.moderator) {
             const reportRef = await firestoreDB.collection('reports').doc(reportId);
             const markRef = await reportRef.collection('marks').doc(reportId);
 
             await reportRef.update({solvedAt: FieldValue.serverTimestamp()});
             const solvedMarks = await reportRef.collection('marks').where('type', '==', 'solved').get();
 
-            if (user.roles.moderator && solvedMarks.docs.length > 5 || user.roles.superadmin || user.roles.admin) {
+            if (user.claims.moderator && solvedMarks.docs.length > 5 || user.claims.superAdmin || user.claims.admin) {
                 await markRef.update({solvedAt: FieldValue.serverTimestamp()});
             } else {
                 await markRef.update({awaitingApproval: FieldValue.serverTimestamp()})
@@ -230,12 +220,38 @@ app.post('/reports/:reportId/marks/:markId', verifyAuth, async (req, response) =
             }
 
             // @ts-ignore
-            await changeGamificationAction(doc.id, 'comment', -1, doc.data().author.userId);
+            await changeGamificationAction(doc.id, 'comment', doc.data().author.userId);
 
-            response.json({reportId, message: 'Marcação efetivada.'});
+            resp.json({reportId, message: 'Marcação efetivada.'});
         }
     } catch (error) {
-        response.status(500).send(error);
+        resp.status(500).send(error);
+    }
+});
+
+app.get('/users/:id/claims', verifyAuth, async (req, resp) => {
+    try {
+        const id = req.params.id;
+        const claims = req.body;
+
+        if (!id) throw new Error('Obrigatório informar ID do usuário.');
+
+        // @ts-ignore
+        if (req.user.claims.superAdmin || req.user.claims.admin) {
+            let apiKey = '';
+            const user = await admin.auth().getUser(id);
+
+            // @ts-ignore
+            if (user.customClaims && user.customClaims.superAdmin && !req.user.claims.superAdmin) {
+                throw new Error('Você não tem permissão para relizar esta ação.');
+            }
+            if (claims.prefecture) apiKey = await admin.auth().createCustomToken(id);
+
+            await admin.auth().setCustomUserClaims(id, {...user.customClaims, ...claims, apiKey})
+        }
+        resp.json(true);
+    } catch (error) {
+        resp.status(500).send(error);
     }
 });
 
