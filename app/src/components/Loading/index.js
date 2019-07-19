@@ -1,10 +1,10 @@
-import React from 'react'
 import PropTypes from 'prop-types'
+import React from 'react'
 import Spinner from 'react-native-loading-spinner-overlay'
 
 import styles from './styles'
 
-export default class Loading extends React.PureComponent {
+class Loading extends React.PureComponent {
   state = { cancelable: false }
 
   componentDidUpdate (prevProps) {
@@ -25,12 +25,10 @@ export default class Loading extends React.PureComponent {
       textStyle={styles.spinnerTextStyle}
     />
   )
-
-  static propTypes = {
-    isLoading: PropTypes.bool.isRequired
-  }
-
-  static defaultProps = {
-    isLoading: false
-  }
 }
+
+Loading.propTypes = {
+  isLoading: PropTypes.bool.isRequired
+}
+
+export default Loading

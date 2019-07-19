@@ -1,13 +1,12 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { connect } from 'react-redux'
-import { InteractionManager, Modal, View } from 'react-native'
-import { Body, Button, Container, Fab, Icon, Left, ListItem, Right, Text, Thumbnail } from 'native-base'
 import { Location, MapView, Permissions } from 'expo'
-import Supercluster from 'supercluster'
-
-import styles from './styles'
+import { Body, Button, Container, Fab, Icon, Left, ListItem, Right, Text, Thumbnail } from 'native-base'
+import PropTypes from 'prop-types'
+import React from 'react'
+import { InteractionManager, Modal, View } from 'react-native'
+import { connect } from 'react-redux'
 import { fetchNearReports, openReport } from 'screens/Timeline/actions'
+import Supercluster from 'supercluster'
+import styles from './styles'
 
 const DELTAS = { latitudeDelta: 1, longitudeDelta: 1 }
 
@@ -43,8 +42,6 @@ class ReportsMap extends React.PureComponent {
         errorMessage: 'Permission to access location was denied'
       })
     }
-
-
 
     let location = await Location.getCurrentPositionAsync({})
     const region = {
@@ -177,20 +174,20 @@ class ReportsMap extends React.PureComponent {
       </Container>
     )
   }
+}
 
-  static propTypes = {
-    user: PropTypes.object.isRequired,
-    reports: PropTypes.array.isRequired,
-    initialRegion: PropTypes.object
-  }
+ReportsMap.propTypes = {
+  user: PropTypes.object.isRequired,
+  reports: PropTypes.array.isRequired,
+  initialRegion: PropTypes.object
+}
 
-  static defaultProps = {
-    reports: [],
-    region: {
-      latitude: -26.967183,
-      longitude: -48.8848786,
-      ...DELTAS
-    }
+ReportsMap.defaultProps = {
+  reports: [],
+  region: {
+    latitude: -26.967183,
+    longitude: -48.8848786,
+    ...DELTAS
   }
 }
 

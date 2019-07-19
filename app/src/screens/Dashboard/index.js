@@ -4,7 +4,6 @@ import { createMaterialTopTabNavigator } from 'react-navigation'
 import Profile from 'screens/Profile'
 import ReportsMap from 'screens/ReportsMap'
 import Timeline from 'screens/Timeline'
-
 import styles from './styles'
 
 export default createMaterialTopTabNavigator(
@@ -18,9 +17,10 @@ export default createMaterialTopTabNavigator(
     navigationOptions: {
       title: 'Cidadão Alerta'
     },
-    tabBarComponent: props => {
-      const index = props.navigation.state.index
-      const goTo = (page) => props.navigation.navigate(page)
+    tabBarComponent: ({ navigation }) => {
+      const { navigate, state } = navigation
+      const { index } = state
+      const goTo = (page) => navigate(page)
 
       return (
         <Footer>

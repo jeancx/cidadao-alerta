@@ -3,8 +3,8 @@ import { reportActionTypeChange } from 'screens/Timeline/actions'
 import bugsnagClient, { buildError, notifyUser } from 'services/bugsnag'
 import { fetchDocAsync, getCollectionRef } from 'services/firebase/firestore'
 import { geo } from 'services/firebase'
-import { buildReportSchema } from 'services/firebase/schemas/report'
-import { uploadImageAsync } from 'services/firebase/storage'
+import buildReportSchema from 'services/firebase/schemas/report'
+import uploadImageAsync from 'services/firebase/storage'
 
 export function loadForm (report) {
   return async dispatch => {

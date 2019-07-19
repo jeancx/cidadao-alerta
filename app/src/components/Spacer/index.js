@@ -1,24 +1,26 @@
-import React from 'react'
 import PropTypes from 'prop-types'
+import React from 'react'
 
-import { View, Text } from 'react-native'
+import { Text, View } from 'react-native'
 
 class Spacer extends React.PureComponent {
-  static propTypes = {
-    size: PropTypes.number
-  }
-
-  static defaultProps = {
-    size: 20
-  }
-
   render () {
+    const { size } = this.props
+
     return (
-      <View style={{ height: this.props.size }}>
+      <View style={{ height: size }}>
         <Text style={{ color: '#fff', textAlign: 'center' }}/>
       </View>
     )
   }
+}
+
+Spacer.defaultProps = {
+  size: 20
+}
+
+Spacer.propTypes = {
+  size: PropTypes.number
 }
 
 export default Spacer

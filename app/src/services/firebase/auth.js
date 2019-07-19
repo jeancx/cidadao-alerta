@@ -1,35 +1,21 @@
 import bugsnagClient, { buildError, notifyUser } from 'services/bugsnag'
 import { auth } from '../firebase'
 import { getDocRef } from './firestore'
-import { uploadImageAsync } from './storage'
+import uploadImageAsync from './storage'
 
-export async function getCurrentUser () {
-  return await auth.currentUser
-}
-
-export async function getUserProfile (userId) {
-  try {
-    const docSnapshot = getDocRef('users', userId).get()
-
-    if (docSnapshot.exists) {
-      return { id: docSnapshot.id, ...await docSnapshot.data() }
-    } else {
-      let user = await getCurrentUser()
-      if (user) return await updateUserProfile(user)
-    }
-  } catch (error) {
-    //notifyUser()
-    bugsnagClient.notify(error, buildError('info', 'getUserProfile', { userId }))
-    return {}
-  }
+export function getCurrentUser () {
+  return auth.currentUser
 }
 
 export async function updateUserProfile (user) {
+  const currentUser = await getCurrentUser()
+  delete currentUser.password
+  delete currentUser.passwordConf
+
   try {
-    const currentUser = await getCurrentUser()
     if (currentUser) {
       if (user.photoURL && user.photoURL.startsWith('file:')) {
-        user.photoURL = await uploadImageAsync(user.photoURL, 'users', `${currentUser.uid}.jpg`)
+        currentUser.photoURL = await uploadImageAsync(user.photoURL, 'users', `${currentUser.uid}.jpg`)
       }
 
       if (user.photoURL) await currentUser.updateProfile({ photoURL: user.photoURL })
@@ -50,13 +36,24 @@ export async function updateUserProfile (user) {
         .then((userDoc) => ({ userDoc }))
     }
   } catch (error) {
-    delete user.password
-    delete user.passwordConf
-
     notifyUser()
-    bugsnagClient.notify(error, buildError('error', 'updateUserProfile', user))
+    bugsnagClient.notify(error, buildError('error', 'updateUserProfile', currentUser))
+  }
+  return null
+}
 
-    return null
+export async function getUserProfile (userId) {
+  try {
+    const docSnapshot = getDocRef('users', userId).get()
+
+    if (docSnapshot.exists) {
+      return { id: docSnapshot.id, ...await docSnapshot.data() }
+    }
+
+    return await updateUserProfile(await getCurrentUser())
+  } catch (error) {
+    bugsnagClient.notify(error, buildError('info', 'getUserProfile', { userId }))
+    return {}
   }
 }
 

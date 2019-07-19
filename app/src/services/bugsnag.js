@@ -3,7 +3,7 @@ import { ToastAndroid } from 'react-native'
 
 export function notifyUser (message) {
   ToastAndroid.showWithGravity(
-    message ? message : ':( Opps, algo de errado não está certo, porque não tenta novamente?',
+    message || ':( Opps, algo de errado não está certo, porque não tenta novamente?',
     ToastAndroid.LONG,
     ToastAndroid.CENTER,
   )

@@ -1,4 +1,4 @@
-import { buildAuthorSchema } from './author'
+import buildAuthorSchema from './author'
 import { coordsToGeopoint, dateToTimestamp } from './functions'
 
 export function buildReportSchema (model, user) {

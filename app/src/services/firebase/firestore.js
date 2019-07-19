@@ -1,5 +1,5 @@
-import { firestore as firestoreDb } from '../firebase'
 import bugsnagClient, { notifyUser, buildError } from 'services/bugsnag'
+import { firestore as firestoreDb } from '../firebase'
 
 export function getCollectionRef (collName) {
   return firestoreDb.collection(collName)
@@ -13,8 +13,8 @@ export function getSubcollectionRef (collName, docId, subCollName) {
   return getDocRef(collName, docId).collection(subCollName)
 }
 
-export async function fireStoreDocsToArray (docs) {
-  return await Promise.all([...docs].map(doc => ({ id: doc.id, ...doc.data() })))
+export function fireStoreDocsToArray (docs) {
+  return Promise.all([...docs].map(doc => ({ id: doc.id, ...doc.data() })))
 }
 
 export async function fetchCollectionAsync (collName, columnOrder, order = 'asc') {

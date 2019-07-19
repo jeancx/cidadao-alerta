@@ -1,6 +1,6 @@
 import { dateToTimestamp } from './functions'
 
-export function buildAuthorSchema (user) {
+export default function buildAuthorSchema (user) {
   return {
     uid: user.firebase.uid,
     displayName: user.firebase.displayName,

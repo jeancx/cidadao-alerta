@@ -1,6 +1,6 @@
 import { Dimensions } from 'react-native'
 
-const { width, heigth } = Dimensions.get('window')
+const { width } = Dimensions.get('window')
 
 export default {
   map: {
@@ -25,7 +25,7 @@ export default {
     fontSize: 16
   },
   callout: {
-    width: 140,
+    width: 140
   },
   modalView: {
     width: width - 20,

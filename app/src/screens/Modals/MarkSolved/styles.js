@@ -1,7 +1,3 @@
-import { Dimensions } from 'react-native'
-
-const DEVICE_WIDTH = Dimensions.get('window').width
-
 export default {
   picturesView: {
     paddingTop: 20,

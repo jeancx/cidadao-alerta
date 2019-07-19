@@ -13,7 +13,6 @@ import CaptureModal from 'screens/Modals/CaptureModal'
 import ReportLocation from 'screens/Modals/ReportLocation'
 import { fetchCategories } from 'screens/Timeline/actions'
 import Utils from 'services/utils'
-
 import { addPicture, changeInput, changeLocation, loadForm, removePicture, resetForm, save } from './actions'
 import styles from './styles'
 

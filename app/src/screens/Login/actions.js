@@ -5,12 +5,7 @@ import bugsnagClient, { buildError, notifyUser } from 'services/bugsnag'
 import { auth, firebase } from 'services/firebase'
 
 export function resetLoading () {
-  try {
-    return dispatch => MessagesAction(dispatch, 'loading', false)
-  } catch (error) {
-    notifyUser()
-    bugsnagClient.notify(error, buildError('error', 'resetLoading'))
-  }
+  return dispatch => MessagesAction(dispatch, 'loading', false)
 }
 
 export function changeInput (name, value) {
@@ -32,7 +27,7 @@ export function authenticate (email, password) {
       bugsnagClient.notify(error, buildError('error', 'authenticate', { email }))
     }
 
-    MessagesAction(dispatch, 'loading', false)
+    return MessagesAction(dispatch, 'loading', false)
   }
 }
 
@@ -43,9 +38,6 @@ export function facebookLogin () {
       const { type, token } = await Facebook.logInWithReadPermissionsAsync('1621776977922757', permissions)
 
       if (type === 'success') {
-        const response = await fetch(`https://graph.facebook.com/me?access_token=${token}`)
-        const json = await response.json()
-        const name = json.name
         const credential = firebase.auth.FacebookAuthProvider.credential(token)
         const facebook = await auth.signInAndRetrieveDataWithCredential(credential)
 

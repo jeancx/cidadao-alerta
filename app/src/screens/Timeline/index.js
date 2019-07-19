@@ -2,16 +2,13 @@ import DropDownHolder from 'components/DropdownHolder'
 import Popup from 'components/Popup'
 import ErrorMessages from 'constants/errors'
 import { Body, Card, CardItem, Container, Content, Fab, Icon, Text, Thumbnail, Toast } from 'native-base'
+import PropTypes from 'prop-types'
 import React from 'react'
 import { ActivityIndicator, FlatList, InteractionManager, NetInfo } from 'react-native'
 import { NavigationActions } from 'react-navigation'
 import { connect } from 'react-redux'
-import ReportForm from 'screens/ReportForm'
 import Utils from 'services/utils'
-import {
-  answerReport, deleteReport, fetchCategories, fetchNearReports, fetchUser, reportActionTypeChange, resetLoading,
-  saveMarkOnReport, shareReport
-} from './actions'
+import * as actions from './actions'
 import ReportCard from './ReportCard'
 import styles from './styles'
 
@@ -20,10 +17,7 @@ const ITEMS_PER_PAGE = 6
 class Timeline extends React.PureComponent {
   state = {
     popupVisible: false,
-    markSolvedVisible: false,
-    markDenouncedVisible: false,
     refreshing: false,
-    report: {},
     lastRefresh: null,
     answerReport: null,
     answered: false
@@ -70,9 +64,11 @@ class Timeline extends React.PureComponent {
   }
 
   refresh = async () => {
+    const { fetchNearReports } = this.props
+
     if (await NetInfo.isConnected.fetch()) {
       this.setState({ refreshing: true }, async () => {
-        await this.props.fetchNearReports()
+        await fetchNearReports()
         this.setState({ refreshing: false })
       })
     } else {
@@ -81,6 +77,7 @@ class Timeline extends React.PureComponent {
   }
 
   openNewReport = () => this.props.navigation.navigate('ReportForm')
+
   closePopup = () => {
     this.props.answerReport(this.state.answerReport.id)
     this.setState({ popupVisible: false, answerReport: null })
@@ -88,30 +85,30 @@ class Timeline extends React.PureComponent {
 
   markSolved = () => {
     const { answerReport } = this.state
-    this.props.saveMarkOnReport('solved', answerReport, {}, this.props.user)
+    const { saveMarkOnReport, user } = this.props
+    saveMarkOnReport('solved', answerReport, {}, user)
     this.closePopup()
   }
 
   renderAnswerReport = () => {
-    const report = this.state.answerReport
-    if (report) {
+    const { answerReport } = this.state
+    if (answerReport) {
       return (
         <React.Fragment>
           <Thumbnail
             square
             large
-            source={{ uri: report.pictures[0] }}
+            source={{ uri: answerReport.pictures[0] }}
             style={{ marginRight: 5, flex: 30 }}
           />
           <Text style={{ flex: 70 }}>
             <Text style={{ fontWeight: 'bold' }}>Este relato foi resolvido?{'\n'}</Text>
-            <Text>{Utils.limitText(report.description, 30)}</Text>
+            <Text>{Utils.limitText(answerReport.description, 30)}</Text>
           </Text>
         </React.Fragment>
       )
-    } else {
-      return (<React.Fragment/>)
     }
+    return (<React.Fragment/>)
   }
 
   renderFooter = () => (this.state.refreshing ? <ActivityIndicator/> : null)
@@ -170,10 +167,24 @@ class Timeline extends React.PureComponent {
       </Container>
     )
   }
+}
 
-  static defaultProps = {
-    reports: []
-  }
+Timeline.defaultProps = {
+  reports: []
+}
+
+Timeline.propTypes = {
+  // eslint-disable-next-line react/forbid-prop-types
+  reports: PropTypes.array,
+  answers: PropTypes.array.isRequired,
+  resetLoading: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired,
+  navigation: PropTypes.object.isRequired,
+  fetchUser: PropTypes.func.isRequired,
+  saveMarkOnReport: PropTypes.func.isRequired,
+  fetchCategories: PropTypes.func.isRequired,
+  answerReport: PropTypes.func.isRequired,
+  fetchNearReports: PropTypes.func.isRequired
 }
 
 const mapStateToProps = state => ({
@@ -182,8 +193,15 @@ const mapStateToProps = state => ({
   answers: state.reports.answers
 })
 const mapDispatchToProps = {
-  fetchNearReports, reportActionTypeChange, shareReport, deleteReport,
-  saveMarkOnReport, fetchCategories, fetchUser, resetLoading, answerReport
+  fetchNearReports: actions.fetchNearReports,
+  reportActionTypeChange: actions.reportActionTypeChange,
+  shareReport: actions.shareReport,
+  deleteReport: actions.deleteReport,
+  saveMarkOnReport: actions.saveMarkOnReport,
+  fetchCategories: actions.fetchCategories,
+  fetchUser: actions.fetchUser,
+  resetLoading: actions.resetLoading,
+  answerReport: actions.answerReport
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(Timeline)

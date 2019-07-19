@@ -1,24 +1,23 @@
-import React from 'react'
+import { Text, View } from 'native-base'
 import PropTypes from 'prop-types'
-
-import { View, Text } from 'native-base'
+import React from 'react'
 
 import styles from './styles'
 
-export default class Messages extends React.PureComponent {
+class Messages extends React.PureComponent {
   render () {
+    const { message } = this.props
+
     return (
       <View style={styles.section_message}>
-        <Text style={styles.text_message}>{this.props.message}</Text>
+        <Text style={styles.text_message}>{message}</Text>
       </View>
     )
   }
-
-  static propTypes = {
-    message: PropTypes.string
-  }
-
-  static defaultProps = {
-    message: ''
-  }
 }
+
+Messages.propTypes = {
+  message: PropTypes.string.isRequired
+}
+
+export default Messages

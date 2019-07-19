@@ -8,27 +8,27 @@ import { withNavigation } from 'react-navigation'
 import { connect } from 'react-redux'
 import MarkDenounced from 'screens/Modals/MarkDenounced'
 import MarkSolved from 'screens/Modals/MarkSolved'
-import Report from 'screens/Report'
-import ReportForm from 'screens/ReportForm'
 import Utils from 'services/utils'
 import { answerReport, deleteReport, reportActionTypeChange, saveMarkOnReport, shareReport } from '../actions'
 import styles from './styles'
 
 class ReportCard extends React.PureComponent {
-  state = {
-    markSolvedVisible: false,
-    markDenouncedVisible: false,
-    answerReport: null,
-    answered: false
-  }
+  state = { markSolvedVisible: false, markDenouncedVisible: false }
 
   supportReport = (reportId) => this.props.reportActionTypeChange(reportId, 'support', this.props.user)
+
   openReport = (reportId) => this.props.navigation.navigate('Report', { reportId })
+
   openEditReport = (report) => this.props.navigation.navigate('ReportForm', { report: report })
+
   getUserAvatar = (author) => author && author.photoURL ? { uri: author.photoURL } : Images.blankAvatar
+
   openMarkSolved = (report) => this.setState({ report, markSolvedVisible: true })
+
   closeMarkSolved = () => this.setState({ report: {}, markSolvedVisible: false })
+
   openMarkDenounced = (report) => this.setState({ report, markDenouncedVisible: true })
+
   closeMarkDenounced = () => this.setState({ report: {}, markDenouncedVisible: false })
 
   renderActionButton = (report, type) => {
@@ -146,10 +146,10 @@ class ReportCard extends React.PureComponent {
       </React.Fragment>
     )
   }
+}
 
-  static defaultProps = {
-    report: {}
-  }
+ReportCard.defaultProps = {
+  report: {}
 }
 
 const mapStateToProps = state => ({

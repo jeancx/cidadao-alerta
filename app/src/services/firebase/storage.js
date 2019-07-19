@@ -1,7 +1,18 @@
+import bugsnagClient, { buildError, notifyUser } from 'services/bugsnag'
 import { storage } from '../firebase'
-import bugsnagClient, { notifyUser, buildError } from 'services/bugsnag'
 
-export async function uploadImageAsync (imageUri, folder, filename) {
+function imageToBlob (imageUri) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.onload = () => resolve(xhr.response)
+    xhr.onerror = (error) => reject(error)
+    xhr.responseType = 'blob'
+    xhr.open('GET', imageUri, true)
+    xhr.send(null)
+  })
+}
+
+export default async function uploadImageAsync (imageUri, folder, filename) {
   try {
     const imageBlob = await imageToBlob(imageUri)
     const ref = storage.ref(`images/${folder}`).child(filename)
@@ -15,20 +26,6 @@ export async function uploadImageAsync (imageUri, folder, filename) {
     bugsnagClient.notify(error,
       buildError('warning', 'uploadImageAsync', { imageUri, folder, filename })
     )
+    return false
   }
-}
-
-function imageToBlob (imageUri) {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.onload = function () {
-      resolve(xhr.response)
-    }
-    xhr.onerror = function (error) {
-      reject(error)
-    }
-    xhr.responseType = 'blob'
-    xhr.open('GET', imageUri, true)
-    xhr.send(null)
-  })
 }

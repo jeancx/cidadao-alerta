@@ -93,10 +93,10 @@ class Login extends React.PureComponent {
       </KeyboardAvoidingView>
     )
   }
+}
 
-  static defaultProps = {
-    errorMessage: null
-  }
+Login.defaultProps = {
+  errorMessage: null
 }
 
 const mapStateToProps = state => ({

@@ -1,13 +1,13 @@
+import DropDownHolder from 'components/DropdownHolder'
+import { ToastAndroid } from 'react-native'
+import bugsnagClient, { buildError, notifyUser } from 'services/bugsnag'
 import { getSubcollectionRef, updateDocTransactionAsync } from 'services/firebase/firestore'
 import { buildUserActionSchema, buildUserStatisticsSchema } from './firebase/schemas/user'
 import pointsByAction from './gamefication/pointsByAction.json'
 import pointsByLevel from './gamefication/pointsByLevel.json'
 import trophies from './gamefication/trophies'
-import bugsnagClient, { buildError, notifyUser } from 'services/bugsnag'
-import { ToastAndroid } from 'react-native'
-import DropDownHolder from 'components/DropdownHolder'
 
-export function changeGamificationAction (docId, action, number, user) {
+export default function changeGamificationAction (docId, action, number, user) {
   return async dispatch => {
     try {
       const points = number * calcPointsByAction(action, user.profile.level || 1)
@@ -18,7 +18,7 @@ export function changeGamificationAction (docId, action, number, user) {
           ? statistics[action].push(docId)
           : statistics[action] = statistics[action].filter(itemId => itemId !== docId)
 
-        statistics.experience = statistics.experience + points
+        statistics.experience += points
 
         const newLevel = calcLevel(statistics.experience)
 
@@ -62,8 +62,8 @@ function trophiesService (user, statistics) {
 
         if (!alreadyEarnedTrophy) {
           statistics.trophy.push(trophy)
-          statistics['experience'] += trophy.points
-          statistics['level'] = calcLevel(statistics['experience'])
+          statistics.experience += trophy.points
+          statistics.level = calcLevel(statistics['experience'])
 
           const message = `Parabens você alcaçou a conquista: ${trophy.name}`
           DropDownHolder.alert('success', 'Conquista Desbloqueada', message)

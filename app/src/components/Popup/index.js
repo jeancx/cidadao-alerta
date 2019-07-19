@@ -48,7 +48,8 @@ Popup.propTypes = {
   type: PropTypes.oneOf(['information', 'alert']),
   close: PropTypes.func,
   confirm: PropTypes.func,
-  cancel: PropTypes.func
+  cancel: PropTypes.func,
+  children: PropTypes.element.isRequired
 }
 
 export default Popup

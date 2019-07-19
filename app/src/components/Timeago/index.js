@@ -1,19 +1,27 @@
-import React from 'react'
-
-import TimeAgo from 'react-native-timeago'
 import moment from 'moment'
 import 'moment/locale/pt-br'
+import PropTypes from 'prop-types'
+import React from 'react'
+import * as RNTimeAgo from 'react-native-timeago'
 
 moment.locale('pt-br')
 
-export default class Timeago extends React.PureComponent {
+class Timeago extends React.PureComponent {
   render () {
+    const { seconds } = this.props
+
     return (
-      <TimeAgo time={moment.unix(this.props.seconds)} hideAgo={true} interval={20000}/>
+      <RNTimeAgo time={moment.unix(seconds)} hideAgo interval={20000}/>
     )
   }
-
-  static defaultProps = {
-    seconds: 0
-  }
 }
+
+Timeago.defaultProps = {
+  seconds: 0
+}
+
+Timeago.propTypes = {
+  seconds: PropTypes.number
+}
+
+export default Timeago

@@ -11,7 +11,7 @@ import styles from './styles'
 
 const initialState = { description: '', errorMessage: null }
 
-export default class MarkDenounced extends React.PureComponent {
+class MarkDenounced extends React.PureComponent {
   state = initialState
 
   saveForm = () => {
@@ -20,7 +20,7 @@ export default class MarkDenounced extends React.PureComponent {
 
     if (!description) return this.setState({ errorMessage: ErrorMessages.missingDescription })
 
-    save('denounced', report, { description }, user).then(close)
+    return save('denounced', report, { description }, user).then(close)
   }
 
   renderFooter = () => (
@@ -69,12 +69,14 @@ export default class MarkDenounced extends React.PureComponent {
       </Dialog>
     )
   }
-
-  static propTypes = {
-    user: PropTypes.object.isRequired,
-    report: PropTypes.object.isRequired,
-    visible: PropTypes.bool.isRequired,
-    save: PropTypes.func.isRequired,
-    close: PropTypes.func.isRequired
-  }
 }
+
+MarkDenounced.propTypes = {
+  user: PropTypes.object.isRequired,
+  report: PropTypes.object.isRequired,
+  visible: PropTypes.bool.isRequired,
+  save: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired
+}
+
+export default MarkDenounced

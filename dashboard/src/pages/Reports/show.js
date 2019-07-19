@@ -12,9 +12,8 @@ import {
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 import avatar from '../../assets/images/user.png'
+import { API } from '../../providers/api'
 import ShowActions from './actions'
-
-const API_URL = 'https://us-central1-cidadao-alerta-2019.cloudfunctions.net/api/v1/'
 
 const styles = theme => ({
   container: {
@@ -70,25 +69,10 @@ class ReportShow extends React.PureComponent {
     dataProvider(
       GET_LIST,
       [{ type: 'collection', value: 'reports' }, { type: 'doc', value: id }, { type: 'collection', value: 'marks' }],
-      {
-        filter: {},
-        sort: { field: 'createdAt', order: 'DESC' }
-      })
-      .then(({ data: marks }) => {
-        this.setState({ solveds: marks.filter(mark => mark.type === 'solved') })
-        this.setState({ denounces: marks.filter(mark => mark.type === 'denounced') })
-      })
-  }
-
-  postToApi = (route, body) => {
-    return fetch(API_URL + 'reports/' + this.props.id + route, {
-      method: 'post',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + localStorage.getItem('FirebaseClientToken')
-      },
-      body: { reportId: this.props.id, ...body }
+      { filter: {}, sort: { field: 'createdAt', order: 'DESC' } }
+    ).then(({ data: marks }) => {
+      this.setState({ solveds: marks.filter(mark => mark.type === 'solved') })
+      this.setState({ denounces: marks.filter(mark => mark.type === 'denounced') })
     })
   }
 
@@ -98,12 +82,11 @@ class ReportShow extends React.PureComponent {
   }
 
   confirmDeleteComment = () => {
-    this.postToApi('comments/' + this.state.comment.id,
-      { reason: this.state.reason, action: 'delete' }
-    ).then(() => {
-      this.fetchComments()
-      this.setState({ deleteDialog: false, comment: {}, reason: '' })
-    })
+    API.delete('/comments/' + this.state.comment.id, { reason: this.state.reason, action: 'delete' })
+      .then(() => {
+        this.fetchComments()
+        this.setState({ deleteDialog: false, comment: {}, reason: '' })
+      })
   }
 
   deleteCommentDialog = () => {
@@ -142,7 +125,7 @@ class ReportShow extends React.PureComponent {
   }
 
   saveMark = (accepted) => {
-    this.postToApi('marks', { markId: this.state.mark.id, accepted: accepted })
+    API.post('marks', { markId: this.state.mark.id, accepted: accepted })
   }
 
   confirmMark = () => {
@@ -210,7 +193,7 @@ class ReportShow extends React.PureComponent {
   }
 
   saveComment = () => {
-    this.postToApi('comments', { type: 'add', text: this.state.commentText })
+    API.post('/comments', { reportId: this.props.id, type: 'add', text: this.state.commentText })
   }
 
   render () {

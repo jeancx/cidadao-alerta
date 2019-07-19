@@ -1,9 +1,8 @@
-import bugsnag from '@bugsnag/expo'
 import rootStack from 'app/navigator'
 import configureStore from 'app/store'
 import getTheme from 'assets/native-base-theme/components'
 import theme from 'assets/native-base-theme/variables/commonColor'
-import { DropDownHolder } from 'components/DropdownHolder'
+import DropDownHolder from 'components/DropdownHolder'
 import { AppLoading, Font } from 'expo'
 import { StyleProvider } from 'native-base'
 import React from 'react'
@@ -14,7 +13,6 @@ import { createAppContainer } from 'react-navigation'
 import { Provider } from 'react-redux'
 import { PersistGate } from 'redux-persist/es/integration/react'
 
-const bugsnagClient = bugsnag()
 const { persistor, store } = configureStore()
 const AppContainer = createAppContainer(rootStack)
 console.disableYellowBox = true
@@ -46,6 +44,10 @@ export default class App extends React.PureComponent {
 
     return (
       <Provider store={store}>
+        <DropdownAlert
+          ref={ref => DropDownHolder.setDropDown(ref)}
+          defaultContainer={{ padding: 8, paddingTop: 30, flexDirection: 'row' }}
+        />
         <PersistGate persistor={persistor}>
           <StyleProvider style={getTheme(theme)}>
             <ThemeProvider>
@@ -55,10 +57,6 @@ export default class App extends React.PureComponent {
             </ThemeProvider>
           </StyleProvider>
         </PersistGate>
-        <DropdownAlert
-          ref={ref => DropDownHolder.setDropDown(ref)}
-          defaultContainer={{ padding: 8, paddingTop: 30, flexDirection: 'row' }}
-        />
       </Provider>
     )
   }

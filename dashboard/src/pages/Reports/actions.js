@@ -10,8 +10,6 @@ import { withDataProvider } from 'react-admin'
 import { connect } from 'react-redux'
 import compose from 'recompose/compose'
 
-const API_URL = 'https://us-central1-cidadao-alerta-2019.cloudfunctions.net'
-
 const styles = theme => ({
   button: {
     color: 'white'
@@ -25,7 +23,7 @@ class ShowActions extends React.PureComponent {
   state = { anchorEl: null, deleteDialog: false, disableDialog: false, reason: '' }
 
   postToApi = (route, body) => {
-    return fetch(API_URL + route, {
+    return fetch(process.env.REACT_APP_API_URL + route, {
       method: 'post',
       headers: {
         'Accept': 'application/json',

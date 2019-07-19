@@ -37,7 +37,7 @@
   "scripts": {
     "start": "env-cmd -f .env.development react-scripts start",
     "build": "react-scripts build",
-    "test": "env-cmd  -f.env.test react-scripts test --env=jsdom",
+    "test": "env-cmd -f .env.test react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "deploy:dev": "env-cmd -f .env.development npm run build && firebase use default && firebase deploy --only hosting:dashboard",
     "deploy:prod": "env-cmd -f .env.production npm run build && firebase use default && firebase deploy --only hosting:dashboard"

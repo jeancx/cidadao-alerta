@@ -3,19 +3,17 @@ function limitText (text, size) {
 
   if (!text) return ''
 
-  if (text.length > size) {
-    return `${text.replace(breakLine, '').substr(0, size)}...`
-  } else {
-    return text.replace(breakLine, ' ').substr(0, text.length)
-  }
+  if (text.length > size) return `${text.replace(breakLine, '').substr(0, size)}...`
+
+  return text.replace(breakLine, ' ').substr(0, text.length)
 }
 
 function buildAddressString (address) {
   if (!address) return ''
 
-  return (address.street ? address.street + ', ' : '') +
-    (address.name && address.name !== address.street ? address.name + ', ' : '') +
-    (address.city ? address.city + ', ' : ('')) +
+  return (address.street ? `${address.street  }, ` : '') +
+    (address.name && address.name !== address.street ? `${address.name  }, ` : '') +
+    (address.city ? `${address.city  }, ` : ('')) +
     (address.region ? address.region : '')
 }
 

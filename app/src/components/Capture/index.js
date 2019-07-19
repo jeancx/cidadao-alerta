@@ -1,16 +1,14 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-
-import { View } from 'react-native'
+import { Camera, ImageManipulator, ImagePicker, Permissions } from 'expo'
 import { Fab, Icon } from 'native-base'
-import { Camera, Permissions, ImagePicker, ImageManipulator } from 'expo'
-
+import PropTypes from 'prop-types'
+import React from 'react'
+import { View } from 'react-native'
 import styles from './styles'
 
 const IMAGE_OPTIONS = { base64: false, exif: true, aspect: [4, 3], quality: 1, skipProcessing: true }
 
-export default class Capture extends React.PureComponent {
-  state = { fabType: false, hasCameraPermission: null, type: Camera.Constants.Type.back, isLoading: true }
+class Capture extends React.PureComponent {
+  state = { type: Camera.Constants.Type.back, isLoading: true }
 
   async componentDidMount () {
     const { status } = await Permissions.askAsync(Permissions.CAMERA)
@@ -24,10 +22,10 @@ export default class Capture extends React.PureComponent {
 
   imagePicker = async () => {
     this.setState({ isLoading: true })
-    let result = await ImagePicker.launchImageLibraryAsync({ ...IMAGE_OPTIONS, autoFocus: true })
+    const result = await ImagePicker.launchImageLibraryAsync({ ...IMAGE_OPTIONS, autoFocus: true })
 
     if (!result.cancelled) {
-      let resizedPhoto = await this.resizePicture(result)
+      const resizedPhoto = await this.resizePicture(result)
 
       this.props.save(resizedPhoto.uri)
     } else {
@@ -40,7 +38,7 @@ export default class Capture extends React.PureComponent {
     const picture = await this.refs.camera.takePictureAsync(IMAGE_OPTIONS)
     this.refs.camera.pausePreview()
 
-    let resizedPhoto = await this.resizePicture(picture)
+    const resizedPhoto = await this.resizePicture(picture)
 
     this.props.save(resizedPhoto.uri)
   }
@@ -79,9 +77,11 @@ export default class Capture extends React.PureComponent {
       </View>
     )
   }
-
-  static propTypes = {
-    save: PropTypes.func.isRequired,
-    close: PropTypes.func.isRequired
-  }
 }
+
+Capture.propTypes = {
+  save: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired
+}
+
+export default Capture

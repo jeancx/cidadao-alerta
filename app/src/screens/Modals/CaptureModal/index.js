@@ -1,13 +1,10 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-
-import { Modal } from 'react-native'
-
 import Capture from 'components/Capture'
-
+import PropTypes from 'prop-types'
+import React from 'react'
+import { Modal } from 'react-native'
 import styles from './styles'
 
-export default class CaptureModal extends React.PureComponent {
+class CaptureModal extends React.PureComponent {
   render () {
     const { visible, save, close } = this.props
 
@@ -17,10 +14,12 @@ export default class CaptureModal extends React.PureComponent {
       </Modal>
     )
   }
-
-  static propTypes = {
-    visible: PropTypes.bool.isRequired,
-    save: PropTypes.func.isRequired,
-    close: PropTypes.func.isRequired
-  }
 }
+
+CaptureModal.propTypes = {
+  visible: PropTypes.bool.isRequired,
+  save: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired
+}
+
+export default CaptureModal

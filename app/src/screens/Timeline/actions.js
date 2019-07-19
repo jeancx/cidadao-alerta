@@ -7,22 +7,27 @@ import { getUserProfile } from 'services/firebase/auth'
 import {
   fetchCollectionAsync, fetchDocAsync, fetchSubcolectionAsync, getDocRef, getSubcollectionRef, updateDocTransactionAsync
 } from 'services/firebase/firestore'
-import { buildReportActionSchema, buildReportMarkSchema } from 'services/firebase/schemas/report'
-import { uploadImageAsync } from 'services/firebase/storage'
-import { changeGamificationAction } from 'services/gamefication'
-import { getCurrentLocation } from 'services/location'
-import { buildReportStatisticsSchema } from '../../services/firebase/schemas/report'
+import {
+  buildReportActionSchema, buildReportMarkSchema, buildReportStatisticsSchema
+} from 'services/firebase/schemas/report'
+import uploadImageAsync from 'services/firebase/storage'
+import changeGamificationAction from 'services/gamefication'
+import getCurrentLocation from 'services/location'
+
+function sortByName (array) {
+  return array.sort((a, b) => (a.name).localeCompare(b.name, 'en', { sensitivity: 'base' }))
+}
 
 export function fetchCategories () {
   return async dispatch => {
     try {
-      let categories = await sortByName(await fetchCollectionAsync('categories'))
+      const categories = await sortByName(await fetchCollectionAsync('categories'))
 
-      for (const cat of categories) {
-        cat.subcategories = await sortByName(
-          await fetchSubcolectionAsync('categories', cat.id, 'subcategories')
+      categories.forEach(async (_, index) => {
+        categories[index].subcategories = await sortByName(
+          await fetchSubcolectionAsync('categories', categories[index].id, 'subcategories')
         )
-      }
+      })
 
       dispatch({
         type: 'CATEGORIES_UPDATE',
@@ -35,32 +40,26 @@ export function fetchCategories () {
   }
 }
 
-function sortByName (array) {
-  return array.sort((a, b) => (a.name).localeCompare(b.name, 'en', { sensitivity: 'base' }))
-}
-
 function calculateDistance (lat1, lat2, lon1, lon2) {
   if ((lat1 === lat2) && (lon1 === lon2)) {
     return 0
-  } else {
-    const radLat1 = Math.PI * lat1 / 180
-    const radLat2 = Math.PI * lat2 / 180
-    const theta = lon1 - lon2
-    const radTheta = Math.PI * theta / 180
-    let distance = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta)
-    distance = Math.acos(distance > 1 ? 1 : distance)
-    distance = distance * 180 / Math.PI
-    distance = distance * 60 * 1.1515
-
-    return distance * 1.609344
   }
+
+  const radLat1 = Math.PI * lat1 / 180
+  const radLat2 = Math.PI * lat2 / 180
+  const theta = lon1 - lon2
+  const radTheta = Math.PI * theta / 180
+  let distance = Math.sin(radLat1) * Math.sin(radLat2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.cos(radTheta)
+  distance = Math.acos(distance > 1 ? 1 : distance)
+  distance = distance * 180 / Math.PI
+  distance = distance * 60 * 1.1515
+
+  return distance * 1.609344
 }
 
 export function resetLoading () {
-  try {
-    return dispatch => MessagesAction(dispatch, 'loading', false)
-  } catch (error) {
-    bugsnagClient.notify(error, buildError('error', 'resetLoading'))
+  return dispatch => {
+    MessagesAction(dispatch, 'loading', false)
   }
 }
 
@@ -79,10 +78,10 @@ export function fetchNearReports () {
       const query = reportsRef.within(geo.point(userLocation.latitude, userLocation.longitude), 50, 'location')
       const reports = await get(query)
 
-      reports.forEach(function(report) {
-        report.distance = calculateDistance(
-          report.location.geopoint._lat, userLocation.latitude,
-          report.location.geopoint._long, userLocation.longitude
+      reports.forEach((_, index) => {
+        reports[index].distance = calculateDistance(
+          reports[index].location.geopoint._lat, userLocation.latitude,
+          reports[index].location.geopoint._long, userLocation.longitude
         )
       })
 
@@ -102,7 +101,7 @@ export function changeReportStatistics (docId, action, number, user) {
     try {
       await dispatch(changeGamificationAction(docId, action, number, user))
       const updateStatistics = report => {
-        let statistics = buildReportStatisticsSchema(report.statistics)
+        const statistics = buildReportStatisticsSchema(report.statistics)
         const counterSum = (statistics[action] += number) || number
         statistics[action] = counterSum > -1 ? counterSum : 0
         return { statistics }
@@ -121,11 +120,9 @@ export function shareReport (report, user) {
   return async dispatch => {
     try {
       const url = `https://cidadaoalerta.org/?id=${report.id}`
+      const message = `${report.description.trim()}\n${url}`
       const content = {
-        title: 'Cidadão Alerta',
-        message: `${report.description.trim()}\n${url}`,
-        url: url,
-        subject: 'Cidadão Alerta'
+        title: 'Cidadão Alerta', message, url, subject: 'Cidadão Alerta'
       }
       const shareResult = await Share.share(content)
       const action = 'share'
@@ -170,37 +167,9 @@ export function deleteReport (reportId, userId) {
   }
 }
 
-export function saveMarkOnReport (type, report, model, user) {
+export function answerReport (reportId) {
   return async dispatch => {
-    try {
-      const reportMarksRef = getSubcollectionRef('reports', report.id, 'marks')
-      const docsSnapshot = await reportMarksRef
-        .where('type', '==', type)
-        .where('userId', '==', user.uid)
-        .get()
-
-      if (model.pictures && model.pictures.length > 0) {
-        const folder = `reports/${report.id}/${type}`
-        model.pictures = await Promise.all([...model.pictures].map(async (picture, index) => {
-          return await uploadImageAsync(picture, folder, `${index}.jpg`)
-        }))
-      }
-
-      if (type === 'solved') {
-        answerReport(report.id)
-      }
-
-      if (docsSnapshot.docs.length <= 0) {
-        await dispatch(changeReportStatistics(report.id, type, 1, user))
-        await dispatch(reportActionTypeChange(report.id, type, user))
-        return await reportMarksRef.add(buildReportMarkSchema(type, model, user))
-      }
-    } catch (error) {
-      notifyUser()
-      bugsnagClient.notify(
-        error, buildError('error', 'saveMarkOnReport', { type, report, model }, user)
-      )
-    }
+    dispatch({ type: 'REPORTS_ANSWERS_UPDATE', data: { reportId } })
   }
 }
 
@@ -229,8 +198,37 @@ export function reportActionTypeChange (docId, action, user) {
   }
 }
 
-export function answerReport (reportId) {
+export function saveMarkOnReport (type, report, model, user) {
   return async dispatch => {
-    dispatch({ type: 'REPORTS_ANSWERS_UPDATE', data: { reportId } })
+    try {
+      const newModel = { ...model }
+      const reportMarksRef = getSubcollectionRef('reports', report.id, 'marks')
+      const docsSnapshot = await reportMarksRef
+        .where('type', '==', type)
+        .where('userId', '==', user.uid)
+        .get()
+
+      if (newModel.pictures && newModel.pictures.length > 0) {
+        const folder = `reports/${report.id}/${type}`
+        newModel.pictures = await Promise.all([...newModel.pictures].map(async (picture, index) => (
+          uploadImageAsync(picture, folder, `${index}.jpg`)
+        )))
+      }
+
+      if (type === 'solved') {
+        answerReport(report.id)
+      }
+
+      if (docsSnapshot.docs.length <= 0) {
+        await dispatch(changeReportStatistics(report.id, type, 1, user))
+        await dispatch(reportActionTypeChange(report.id, type, user))
+        await reportMarksRef.add(buildReportMarkSchema(type, newModel, user))
+      }
+    } catch (error) {
+      notifyUser()
+      bugsnagClient.notify(
+        error, buildError('error', 'saveMarkOnReport', { type, report, model }, user)
+      )
+    }
   }
 }

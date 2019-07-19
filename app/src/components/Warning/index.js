@@ -1,27 +1,30 @@
-import React from 'react'
 import PropTypes from 'prop-types'
-
+import React from 'react'
 import { Alert } from 'react-native'
 
-export default class Warning extends React.PureComponent {
-  static propTypes = {
-    message: PropTypes.string
-  }
+class Warning extends React.PureComponent {
+  static render () {
+    const { message } = this.props
 
-  static defaultProps = {
-    message: ''
-  }
-
-  render () {
     return (
       Alert.alert(
         'Aviso',
-        'Ocorreu um erro: \n' + this.props.message,
+        `Ocorreu um erro: \n${message}`,
         [
-          { text: 'Ok', onPress: () => console.log('OK Pressed') },
+          { text: 'Ok', onPress: () => console.log('OK Pressed') }
         ],
         { cancelable: true }
       )
     )
   }
 }
+
+Warning.propTypes = {
+  message: PropTypes.string
+}
+
+Warning.defaultProps = {
+  message: ''
+}
+
+export default Warning

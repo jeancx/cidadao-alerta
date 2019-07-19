@@ -1,12 +1,10 @@
-import React from 'react'
-import { connect } from 'react-redux'
-import { Image, KeyboardAvoidingView } from 'react-native'
-import { Button, Container, Content, Form, Icon, Input, Item, Text } from 'native-base'
-
+import Loading from 'components/Loading'
 import Messages from 'components/Messages'
 import Spacer from 'components/Spacer'
-import Loading from 'components/Loading'
-
+import { Button, Container, Content, Form, Icon, Input, Item, Text } from 'native-base'
+import React from 'react'
+import { Image, KeyboardAvoidingView } from 'react-native'
+import { connect } from 'react-redux'
 import { changeInput, register } from './actions'
 import styles from './styles'
 
@@ -79,10 +77,10 @@ class Register extends React.PureComponent {
       </KeyboardAvoidingView>
     )
   }
+}
 
-  static defaultProps = {
-    errorMessage: null,
-  }
+Register.defaultProps = {
+  errorMessage: null
 }
 
 const mapStateToProps = state => ({

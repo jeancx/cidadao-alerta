@@ -1,12 +1,11 @@
 import Loading from 'components/Loading'
 import Spacer from 'components/Spacer'
-
 import Images from 'constants/images'
 import {
   Body, Button, Container, Content, Fab, Form, Icon, Input, Item, Label, Left, ListItem, Right, Text
 } from 'native-base'
 import React from 'react'
-import { Alert, View, Linking } from 'react-native'
+import { Alert, Linking, View } from 'react-native'
 import AnimatedBar from 'react-native-animated-bar'
 import { Avatar, ButtonGroup } from 'react-native-elements'
 import HeaderImageScrollView from 'react-native-image-header-scroll-view'
@@ -14,7 +13,6 @@ import { connect } from 'react-redux'
 import CaptureModal from 'screens/Modals/CaptureModal'
 import pointsByLevel from 'services/gamefication/pointsByLevel.json'
 import trophies from 'services/gamefication/trophies'
-
 import { changeInput, fillProfileForm, logout, save } from './actions'
 import styles from './styles'
 
@@ -209,7 +207,7 @@ class Profile extends React.PureComponent {
     const url = 'https://forms.gle/TwG5nUKWbkks3tSi9'
     Linking.canOpenURL(url).then(supported => {
       if (supported) Linking.openURL(url)
-    });
+    })
   }
 
   render () {

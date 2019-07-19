@@ -56,11 +56,11 @@ export default class EditComment extends React.PureComponent {
       </Dialog>
     )
   }
+}
 
-  static propTypes = {
-    visible: PropTypes.bool.isRequired,
-    save: PropTypes.func.isRequired,
-    close: PropTypes.func.isRequired,
-    comment: PropTypes.object.isRequired
-  }
+EditComment.propTypes = {
+  visible: PropTypes.bool.isRequired,
+  save: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired,
+  comment: PropTypes.object.isRequired
 }

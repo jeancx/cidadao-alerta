@@ -11,7 +11,7 @@ import styles from './styles'
 
 const initialState = { description: '', pictures: [], takingPicture: false, errorMessage: null }
 
-export default class MarkSolved extends React.PureComponent {
+class MarkSolved extends React.PureComponent {
   state = initialState
 
   savePicture = (picture) => {
@@ -107,12 +107,14 @@ export default class MarkSolved extends React.PureComponent {
       </Dialog>
     )
   }
-
-  static propTypes = {
-    user: PropTypes.object.isRequired,
-    report: PropTypes.object.isRequired,
-    visible: PropTypes.bool.isRequired,
-    save: PropTypes.func.isRequired,
-    close: PropTypes.func.isRequired
-  }
 }
+
+MarkSolved.propTypes = {
+  user: PropTypes.object.isRequired,
+  report: PropTypes.object.isRequired,
+  visible: PropTypes.bool.isRequired,
+  save: PropTypes.func.isRequired,
+  close: PropTypes.func.isRequired
+}
+
+export default MarkSolved

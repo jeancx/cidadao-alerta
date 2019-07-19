@@ -11,3 +11,4 @@ npm-debug.*
 /.expo-shared
 /yarn.lock
 /package-lock.json
+/app.json
